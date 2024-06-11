@@ -683,10 +683,10 @@ kmeans_labels_3 = kmeans_3.fit_predict(df_scaled)
 
 # Thu thập các nhãn từ các mô hình KMeans khác nhau
 all_labels = np.array([kmeans_labels_1, kmeans_labels_2, kmeans_labels_3])
-print(all_labels)
+
 # Thực hiện biểu quyết đa số để xác định nhãn cuối cùng
 final_labels, _ = mode(all_labels)
-print(final_labels)
+
 # Chuyển đổi final_labels thành một mảng 1D
 final_labels = final_labels.flatten()
 
@@ -794,6 +794,7 @@ from keras.layers import Input, Dense, Dropout
 from keras.models import Model
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping
+from keras.models import load_model
 
 # Định nghĩa Autoencoder
 
@@ -820,6 +821,18 @@ autoencoder.fit(df_scaled, df_scaled,
                 shuffle=True,
                 validation_split=0.2,
                 callbacks=[early_stopping])
+
+# Lưu mô hình autoencoder đã huấn luyện
+autoencoder.save('autoencoder_model.h5')
+
+# Tải lại mô hình autoencoder đã lưu
+autoencoder = load_model('autoencoder_model.h5')
+
+# Tạo mô hình encoder chỉ bao gồm lớp encoder
+encoder_model = Model(inputs=autoencoder.input, outputs=autoencoder.get_layer(index=1).output)
+
+# Lấy biểu diễn nén từ lớp encoder
+encoded_data = encoder_model.predict(df_scaled)
 
 # Lấy biểu diễn nén từ lớp ẩn
 encoder_model = Model(inputs=input_layer, outputs=encoder)
@@ -855,7 +868,7 @@ labels_hierarchical = apply_clustering_and_evaluate(encoded_data, hierarchical, 
 # Apply Gaussian Mixture Models clustering and evaluate
 print("Results after applying Autoencoder and Gaussian Mixture Models Clustering:")
 gmm = GaussianMixture(n_components=3, random_state=42)
-labels_gmm = apply_clustering_and_evaluate(decoded_data, gmm, "Gaussian Mixture")
+labels_gmm = apply_clustering_and_evaluate(encoded_data, gmm, "Gaussian Mixture")
 
 def plot_clustering_deep_horizontal(data, labels, title, ax):
     unique_labels = np.unique(labels)
