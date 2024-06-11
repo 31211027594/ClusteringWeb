@@ -32,13 +32,13 @@ model = joblib.load('udmh/best_model_KMeans.pkl')
 # Chuyển đổi mô hình thành JSON
 # Kiểm tra loại mô hình để lấy các centroid tương ứng
 if hasattr(model, 'cluster_centers_'):
-    centroids = model.cluster_centers_.tolist()  # KMeans có cluster_centers_
+    centroids = model.cluster_centers_.tolist()  
 elif hasattr(model, 'children_'):
     from scipy.cluster.hierarchy import fcluster
     import numpy as np
     from sklearn.metrics.pairwise import euclidean_distances
 
-    n_clusters = 3  # Số lượng cụm mong muốn, cần điều chỉnh phù hợp với mô hình của bạn
+    n_clusters = 3  
     distances = euclidean_distances(model.children_, model.children_)
     centroids = [np.mean(distances[model.labels_ == i], axis=0).tolist() for i in range(n_clusters)]
 else:
